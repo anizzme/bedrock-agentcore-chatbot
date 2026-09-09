@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "id": "platform-covered",
+      "prompt": "How do I return an item I bought?",
+      "expected": "The model should answer the question using only the provided FAQ document."
+    },
+    {
+      "id": "platform-uncovered",
+      "prompt": "Do you sell gift cards?",
+      "expected": "Please contact our human support line for assistance with this request."
+    },
+    {
+      "id": "other-request",
+      "prompt": "Who is the CEO of your company?",
+      "expected": "Please contact our human support line for assistance with this request."
+    },
+    {
+      "id": "bug-report",
+      "prompt": "The shopping cart page is completely broken and won't load.",
+      "expected": "The model should ask for the user's environment and steps to reproduce before filing a ticket."
+    }
+  ]
+}
