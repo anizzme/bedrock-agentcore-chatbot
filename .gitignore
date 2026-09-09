@@ -5,3 +5,8 @@ demo_guides/*
 scripts/*
 agentcore_config.json
 output_eval_dataset.jsonl
+# Python and Environment exclusions
+venv/
+__pycache__/
+.env
+*.zip
