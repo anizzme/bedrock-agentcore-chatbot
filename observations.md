@@ -1,26 +1,21 @@
-# Evaluation Observations and Benchmark Improvements
+# Observations
 
-## Initial Benchmark (Attempt 1)
-- **Overall Score**: 0.67 (4 / 6 passing tests)
-- **Failing Routes**:
-  - `faq_lookup`: Returned generic fallbacks on multi-part policy questions.
-  - `bug_report`: Failed validation due to premature submission before collecting required reproduction steps and severity level.
+## What was tested
+Four prompts in harness-tests.json: a covered platform question, an uncovered platform question, an out-of-scope request, and a vague bug report.
 
-### Issues Identified
-1. **System Prompt Ambiguity**: The routing logic allowed early termination when users supplied vague bug statements (e.g., "The checkout button doesn't work").
-2. **Context Window / Retrieval Depth**: In `online_shop_faq.md`, multi-part queries regarding return shipping windows and refund processing timelines were failing keyword similarity thresholds.
-3. **Missing Tool Schema Invariants**: `create_bug_report` received null/empty values for fields that Jira/ticket APIs require (`steps_to_reproduce`, `severity`).
+## Playground runs (Nova Pro, same system prompt, single runs)
+- "How do I return an item I bought?" -> answered the return question (306 in / 29 out, 465 ms)
+- "Do you sell gift cards?" -> human-support sentence (303 / 12, 422 ms)
+- "Who is the CEO of your company?" -> human-support sentence (305 / 13, 392 ms)
 
----
+## Evaluation
+Bedrock automated evaluation, job support-chatbot-eval-attempt-3: Correctness 1.00.
+Dataset size: [N]. Small and hand-built, so it shows the prompt handles these cases, not that it is reliable on real traffic.
 
-## Refinement (Attempt 2)
-- **Overall Score**: 1.00 (6 / 6 passing tests)
+## Takeaways
+- An FAQ question the FAQ does not cover (gift cards) was escalated instead of answered with an invented policy.
+- Both escalation cases returned the exact fixed sentence the prompt requires.
+- The bug route is guarded twice: the prompt forbids filing without all three details, and the Lambda rejects empty fields.
 
-### Modifications Applied
-1. **Strengthened Multi-Turn Gathering**: Updated `system_prompt.txt` with strict gatekeeper instructions: do not call `create_bug_report` until all 4 core parameters are explicitly collected from the user.
-2. **Corpus Alignment**: Synchronized `online_shop_faq.md` with explicit headers and standardized phrasing matching the exact assertions in `harness-tests.json`.
-3. **Bug Report Tool Validation**: Added Pydantic schema validation inside `create_bug_report.py` ensuring graceful fallback reminders instead of invoking tools with empty parameters.
-
-### Real Findings
-- **Deterministic Slot Filling**: Enforcing a checklist in the system prompt increased parameter extraction accuracy from 67% to 100%.
-- **Route Specificity**: Adding explicit trigger phrases prevented false-positive routing between general FAQ inquiries and defect reports.
+## Not yet tested
+Mixed-intent messages, prompt-injection attempts, typos, and non-English input.
